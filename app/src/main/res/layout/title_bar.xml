@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.eyck.mobileplayer.view.TitleBarView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="55dp"
+    android:background="#3097FD"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:src="@drawable/ic_topbanner_logo" />
+
+    <TextView
+        android:id="@+id/tv_main_search"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_weight="1"
+        android:background="@drawable/main_search_bg_selector"
+        android:clickable="true"
+        android:drawableLeft="@drawable/main_search_drawable_selector"
+        android:drawablePadding="3dp"
+        android:text="全网搜索"
+        android:textColor="@drawable/main_search_color_selector" />
+
+    <RelativeLayout
+        android:id="@+id/rl_game"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/iv_game"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:drawableLeft="@drawable/ic_topbanner_game" />
+
+        <ImageView
+            android:layout_alignRight="@id/iv_game"
+            android:layout_marginTop="8dp"
+            android:layout_width="6dp"
+            android:layout_height="6dp"
+            android:background="@drawable/ic_topbanner_dot" />
+
+    </RelativeLayout>
+
+
+    <ImageView
+        android:id="@+id/iv_record"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="8dp"
+        android:clickable="true"
+        android:src="@drawable/ic_topbanner_record" />
+
+</com.eyck.mobileplayer.view.TitleBarView>

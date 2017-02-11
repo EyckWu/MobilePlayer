@@ -5,14 +5,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.MotionEvent;
 
 import com.eyck.mobileplayer.R;
+import com.eyck.mobileplayer.utils.LogUtils;
 
 public class LauncherActivity extends Activity {
-
-    private static final String TAG = LauncherActivity.class.getSimpleName();
 
     private Handler handler = new Handler(){
         @Override
@@ -24,7 +22,8 @@ public class LauncherActivity extends Activity {
     //解决创建多个MainActivity bug
     private boolean isFirstStart = true;
     private void startMainActivity(){
-        Log.d(TAG,"LauncherActivity>startMainActivity>isFirstStart="+isFirstStart);
+        LogUtils.Logd(this,"startMainActivity()");
+        LogUtils.Logd("startMainActivity()");
         if(isFirstStart) {
             isFirstStart = false;
             Intent intent = new Intent(LauncherActivity.this,MainActivity.class);
