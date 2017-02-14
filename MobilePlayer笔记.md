@@ -82,3 +82,9 @@ findViewById离线使用脚本快速实例化控件
 	注：在准备好了的监听获取	
 
     2、实例化Handler,每秒得到当前视频播放进度，SeekBar.setProgress(当前进度)
+
+#SeekBar的拖动
+    1、视频的总时长和SeekBar的setMax(总时长)
+	注：在准备好了的监听获取	
+
+	2、设置SeekBar的状态改变监听

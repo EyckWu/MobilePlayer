@@ -57,6 +57,7 @@
                 android:background="@drawable/btn_voice_drawable_selector" />
 
             <SeekBar
+                android:id="@+id/sb_voice"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -102,6 +103,7 @@
                     android:textColor="#ffffff" />
 
                 <SeekBar
+                    android:id="@+id/sb_progress"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
