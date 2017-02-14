@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.widget.MediaController;
 import android.widget.Toast;
 import android.widget.VideoView;
 
@@ -24,7 +23,7 @@ public class SystemVideoPlayer extends Activity {
         videoview.setOnPreparedListener(new MyOnPreparedListener());
         videoview.setOnCompletionListener(new MyOnCompletionListener());
         videoview.setOnErrorListener(new MyOnErrorListener());
-        videoview.setMediaController(new MediaController(SystemVideoPlayer.this));
+//        videoview.setMediaController(new MediaController(SystemVideoPlayer.this));
 
         uri = getIntent().getData();
         if(uri != null) {
