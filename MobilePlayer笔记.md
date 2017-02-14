@@ -73,3 +73,12 @@ SurfaceView默认使用双缓存技术，它支持在子线程中绘制图像，
 
 #全屏模式
     android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+
+#findViewById离线使用
+findViewById离线使用脚本快速实例化控件
+
+#视频Seekbar更新
+    1、视频的总时长和SeekBar的setMax(总时长)
+	注：在准备好了的监听获取	
+
+    2、实例化Handler,每秒得到当前视频播放进度，SeekBar.setProgress(当前进度)
