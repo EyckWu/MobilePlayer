@@ -20,7 +20,11 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.eyck.mobileplayer.R;
+import com.eyck.mobileplayer.utils.LogUtils;
 import com.eyck.mobileplayer.utils.TimeUtils;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class SystemVideoPlayer extends Activity implements View.OnClickListener {
 
@@ -59,6 +63,8 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
                     //更新进度
                     sb_progress.setProgress(currentPosition);
                     currentTime.setText(timeUtils.stringForTime(currentPosition));
+                    //更新系统时间
+                    tvSystemTime.setText(getSystemTime());
                     //移除消息重新发送
                     handler.removeMessages(PROGRESS);
                     handler.sendEmptyMessageDelayed(PROGRESS,1000);
@@ -66,6 +72,13 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
             }
         }
     };
+
+    private String getSystemTime() {
+        SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
+        String systemTime = format.format(new Date());
+        LogUtils.Logd(systemTime);
+        return systemTime;
+    }
 
     /**
      * Find the Views in the layout<br />
@@ -159,6 +172,9 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
 
     @Override
     protected void onDestroy() {
+        //移除所有的消息
+        handler.removeCallbacksAndMessages(null);
+
         if(mReceiver != null) {
             unregisterReceiver(mReceiver);
             mReceiver = null;
@@ -172,7 +188,7 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         mReceiver = new MyBroadcastReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_BATTERY_CHANGED);
-        registerReceiver(new MyBroadcastReceiver(),filter);
+        registerReceiver(mReceiver,filter);
     }
 
     class MyBroadcastReceiver extends BroadcastReceiver{
