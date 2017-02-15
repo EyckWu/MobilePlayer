@@ -1,10 +1,12 @@
 package com.eyck.mobileplayer.DataBean;
 
+import java.io.Serializable;
+
 /**
  * Created by Eyck on 2017/2/10.
  */
 
-public class MediaInfo {
+public class MediaInfo implements Serializable{
 
     String name ;
     long duration ;

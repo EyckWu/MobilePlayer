@@ -145,3 +145,31 @@ findViewById离线使用脚本快速实例化控件
         super.onDestroy();
     }
 	注：一般情况下，创建资源时先执行创建父类的资源；释放资源时，先释放子类的资源
+
+#传递列表数据到Activity中，列表中的数据有可能是对象或int等基本数据类型
+    注：传递数据时要将对象序列化，Parcelable和Serializable
+
+#Parcelable和Serializable的区别
+    Android自定义对象课序列化有两个选择，一个是Serializable，另一个是Parcelable。
+
+	一、对象为什么需要序列化
+	1、永久性保存对象，保存对象的字节序列到本地文件。
+	2、通过序列化对象在网络中传递数据。
+	3、通过序列化对象在进程间传递对象。
+
+	二、当对象需要被序列化是如何选择所使用的接口
+	1、在使用内存的时候Parcelable比Serializable的性能要高。
+	2、Serializable在序列化的时候会产生大量的临时变量，从而引起频繁的GC（内存回收）。
+	3、Parcelable不能使用在将对象存储在磁盘上的这种情况，因为在外界的变化下Parcelable不能很好的保证数据的持续性。
+
+#手势识别器
+    1、定义
+	
+	2、实例化
+	重写 双击，单击，长按
+
+	3、onTouchEvent(),方法中把时间传递给手势识别器
+    
+    
+	
+    

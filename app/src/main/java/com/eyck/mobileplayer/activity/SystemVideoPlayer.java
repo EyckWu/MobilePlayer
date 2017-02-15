@@ -19,17 +19,21 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import com.eyck.mobileplayer.DataBean.MediaInfo;
 import com.eyck.mobileplayer.R;
 import com.eyck.mobileplayer.utils.LogUtils;
 import com.eyck.mobileplayer.utils.TimeUtils;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 public class SystemVideoPlayer extends Activity implements View.OnClickListener {
 
     private TimeUtils timeUtils;
     private MyBroadcastReceiver mReceiver;
+    private ArrayList<MediaInfo> mediaInfos;
+    private int position;
 
     private static final int PROGRESS = 1;
 
@@ -72,6 +76,7 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
             }
         }
     };
+
 
     private String getSystemTime() {
         SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
@@ -128,8 +133,10 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
             // Handle clicks for switchControl
         } else if ( v == btnExit ) {
             // Handle clicks for btnExit
+            finish();
         } else if ( v == btnPre ) {
             // Handle clicks for btnPre
+            playPreVideo();
         } else if ( v == btnPlayingStatus ) {
             // Handle clicks for btnPlayingStatus
             if(videoview.isPlaying()) {
@@ -145,11 +152,54 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
             }
         } else if ( v == btnNext ) {
             // Handle clicks for btnNext
+            playNextVideo();
         } else if ( v == btnScreenStatus ) {
             // Handle clicks for btnScreenStatus
         }
     }
 
+    private void playPreVideo() {
+        if(mediaInfos != null && mediaInfos.size()>0) {
+            position--;
+            if(position>=0) {
+                //播放下一个
+                MediaInfo mediaInfo = mediaInfos.get(position);
+                tvName.setText(mediaInfo.getName());
+                videoview.setVideoPath(mediaInfo.getData());
+            }else {
+                position = 0;
+                setButtonStatus(0);
+            }
+        }else if(uri != null) {
+            setButtonStatus(0);
+        }
+    }
+
+    private void playNextVideo() {
+        if(mediaInfos != null && mediaInfos.size()>0) {
+            position++;
+            if(position<mediaInfos.size()) {
+                //播放下一个
+                MediaInfo mediaInfo = mediaInfos.get(position);
+                tvName.setText(mediaInfo.getName());
+                videoview.setVideoPath(mediaInfo.getData());
+            }else {
+                position = mediaInfos.size()-1;
+                setButtonStatus(1);
+            }
+        }else if(uri != null) {
+            setButtonStatus(1);
+        }
+    }
+
+    private void setButtonStatus(int status) {
+        if(status == 1) {
+            Toast.makeText(SystemVideoPlayer.this, "没有下一条视频了", Toast.LENGTH_SHORT).show();
+        }else if(status == 0) {
+            Toast.makeText(SystemVideoPlayer.this, "没有上一条视频了", Toast.LENGTH_SHORT).show();
+        }
+
+    }
 
 
     @Override
@@ -162,12 +212,34 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         setListener();
 //        videoview.setMediaController(new MediaController(SystemVideoPlayer.this));
 
-        uri = getIntent().getData();
-        if(uri != null) {
+        getData();
+        
+        setData();
+
+
+    }
+
+    private void setData() {
+        if(mediaInfos != null && mediaInfos.size()>0) {
+            MediaInfo mediaInfo = mediaInfos.get(position);
+            tvName.setText(mediaInfo.getName());
+            videoview.setVideoPath(mediaInfo.getData());
+
+        }else if(uri != null) {
             videoview.setVideoURI(uri);
+            tvName.setText(uri.toString());
+        }else {
+            Toast.makeText(SystemVideoPlayer.this, "没有视频", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void getData() {
+        uri = getIntent().getData();
+        mediaInfos = (ArrayList<MediaInfo>) getIntent().getSerializableExtra("medialist");
+        position = getIntent().getIntExtra("position",0);
 
 
+        
     }
 
     @Override
@@ -273,6 +345,7 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         @Override
         public void onCompletion(MediaPlayer mp) {
             Toast.makeText(SystemVideoPlayer.this, "播放完成", Toast.LENGTH_SHORT).show();
+            playNextVideo();
         }
     }
     class MyOnErrorListener implements MediaPlayer.OnErrorListener {

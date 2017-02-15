@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
@@ -23,7 +24,6 @@ import com.eyck.mobileplayer.activity.SystemVideoPlayer;
 import com.eyck.mobileplayer.adapter.VideoFragmentAdapter;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Eyck on 2017/2/10.
@@ -34,7 +34,7 @@ public class VideoFragment extends BaseFragment {
     private ListView lv_fragment_video;
     private TextView tv_fragment_video;
     private ProgressBar pb_fragment_video;
-    private List<MediaInfo> mediaInfos;
+    private ArrayList<MediaInfo> mediaInfos;
     private MediaInfo mediaInfo;
     private VideoFragmentAdapter adapter;
     private Handler handler = new Handler(){
@@ -69,8 +69,16 @@ public class VideoFragment extends BaseFragment {
 //                mContext.startActivity(intent);
 
                 // 2、调用系统播放器
+//                Intent intent = new Intent(mContext,SystemVideoPlayer.class);
+//                intent.setDataAndType(Uri.parse(mediaInfo.getData()),"video/*");
+//                mContext.startActivity(intent);
+
+                // 3、传递视频列表
                 Intent intent = new Intent(mContext,SystemVideoPlayer.class);
-                intent.setDataAndType(Uri.parse(mediaInfo.getData()),"video/*");
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("medialist",mediaInfos);
+                intent.putExtras(bundle);
+                intent.putExtra("position",position);
                 mContext.startActivity(intent);
             }
         });
@@ -104,7 +112,9 @@ public class VideoFragment extends BaseFragment {
                         long size = cursor.getLong(2);
                         String data = cursor.getString(3);
                         String artist = cursor.getString(4);
-                        mediaInfos.add(new MediaInfo(name,duration,size,data,artist));
+                        if(duration > 0) {
+                            mediaInfos.add(new MediaInfo(name,duration,size,data,artist));
+                        }
                     }
                 }
                 cursor.close();
