@@ -88,3 +88,60 @@ findViewById离线使用脚本快速实例化控件
 	注：在准备好了的监听获取	
 
 	2、设置SeekBar的状态改变监听
+
+#横竖屏切换
+    1、配置文件配置
+	android:screenOrientation="landscape"<!--横屏-->
+	android:screenOrientation="portrait"<!--竖屏-->
+    
+    2、编码方式
+	public void switchOrientation(View view){
+        //获取屏幕方向
+        int orientation = getResources().getConfiguration().orientation;
+        if(orientation == Configuration.ORIENTATION_PORTRAIT) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }else {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
+    }
+	/*********/
+	@Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        int orientation = newConfig.orientation;
+        if(orientation == Configuration.ORIENTATION_PORTRAIT) {
+            Toast.makeText(OrientationActivity.this, "竖屏", Toast.LENGTH_SHORT).show();
+        }else {
+            Toast.makeText(OrientationActivity.this, "横屏", Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+#注册广播有两种方式:静态注册和动态注册
+    1、静态注册：在功能清单文件中注册，只要软件安装在手机上，就算软件不启动，也能收到对应的广播；
+	注：并不是所有的广播都可以静态注册，例如电量变化、锁屏、等
+    2、动态注册：只有注册的代码被执行后，才能收到对应的广播
+	//注册广播
+        mReceiver = new MyBroadcastReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+        registerReceiver(new MyBroadcastReceiver(),filter);
+	
+		class MyBroadcastReceiver extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int level = intent.getIntExtra("level", 0);//获取电量
+            //设置
+            setBattery(level);
+        }
+    }
+	//解注册广播
+	@Override
+    protected void onDestroy() {
+        if(mReceiver != null) {
+            unregisterReceiver(mReceiver);
+            mReceiver = null;
+        }
+        super.onDestroy();
+    }
+	注：一般情况下，创建资源时先执行创建父类的资源；释放资源时，先释放子类的资源

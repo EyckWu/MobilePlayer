@@ -1,6 +1,10 @@
 package com.eyck.mobileplayer.activity;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -21,6 +25,7 @@ import com.eyck.mobileplayer.utils.TimeUtils;
 public class SystemVideoPlayer extends Activity implements View.OnClickListener {
 
     private TimeUtils timeUtils;
+    private MyBroadcastReceiver mReceiver;
 
     private static final int PROGRESS = 1;
 
@@ -139,12 +144,9 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_system_video_player);
         findViews();
-        timeUtils = new TimeUtils();
-//        videoview = (VideoView)findViewById(R.id.videoview);
+        initData();
 
-        videoview.setOnPreparedListener(new MyOnPreparedListener());
-        videoview.setOnCompletionListener(new MyOnCompletionListener());
-        videoview.setOnErrorListener(new MyOnErrorListener());
+        setListener();
 //        videoview.setMediaController(new MediaController(SystemVideoPlayer.this));
 
         uri = getIntent().getData();
@@ -153,6 +155,86 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         }
 
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        if(mReceiver != null) {
+            unregisterReceiver(mReceiver);
+            mReceiver = null;
+        }
+        super.onDestroy();
+    }
+
+    private void initData() {
+        timeUtils = new TimeUtils();
+        //注册广播
+        mReceiver = new MyBroadcastReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+        registerReceiver(new MyBroadcastReceiver(),filter);
+    }
+
+    class MyBroadcastReceiver extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int level = intent.getIntExtra("level", 0);//获取电量
+            //设置
+            setBattery(level);
+        }
+    }
+
+    private void setBattery(int level) {
+        if(level <= 0) {
+            ivBattery.setImageResource(R.drawable.ic_battery_0);
+        }else if(level <= 10) {
+            ivBattery.setImageResource(R.drawable.ic_battery_10);
+        }else if(level <= 20) {
+            ivBattery.setImageResource(R.drawable.ic_battery_20);
+        }else if(level <= 40) {
+            ivBattery.setImageResource(R.drawable.ic_battery_40);
+        }else if(level <= 60) {
+            ivBattery.setImageResource(R.drawable.ic_battery_60);
+        }else if(level <= 80) {
+            ivBattery.setImageResource(R.drawable.ic_battery_80);
+        }else {
+            ivBattery.setImageResource(R.drawable.ic_battery_100);
+        }
+    }
+
+    private void setListener() {
+        videoview.setOnPreparedListener(new MyOnPreparedListener());
+        videoview.setOnCompletionListener(new MyOnCompletionListener());
+        videoview.setOnErrorListener(new MyOnErrorListener());
+
+        sb_progress.setOnSeekBarChangeListener(new MyOnSeekBarChangeListener());
+    }
+
+    class MyOnSeekBarChangeListener implements SeekBar.OnSeekBarChangeListener{
+
+        /**
+         *
+         * @param seekBar
+         * @param progress
+         * @param fromUser 用户操作时返回true,系统更新返回false
+         */
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            if(fromUser) {
+                videoview.seekTo(progress);
+            }
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+
+        }
     }
 
     class MyOnPreparedListener implements MediaPlayer.OnPreparedListener {
