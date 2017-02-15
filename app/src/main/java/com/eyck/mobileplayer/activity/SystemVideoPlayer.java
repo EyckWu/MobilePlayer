@@ -10,10 +10,13 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,11 +37,16 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
     private MyBroadcastReceiver mReceiver;
     private ArrayList<MediaInfo> mediaInfos;
     private int position;
+    private GestureDetector detector;
+    private boolean isShow = false;
 
-    private static final int PROGRESS = 1;
+    private static final int PROGRESS = 1;//播放进度
+    private static final int SHOWCONTROLLAYOUT = 2;//控制面板
 
     private Uri uri;
     private VideoView videoview;
+
+    private RelativeLayout rl_control;
     private LinearLayout llStateTop;
     private TextView tvName;
     private ImageView ivBattery;
@@ -73,6 +81,13 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
                     handler.removeMessages(PROGRESS);
                     handler.sendEmptyMessageDelayed(PROGRESS,1000);
                     break;
+                case  SHOWCONTROLLAYOUT:
+                    if(isShow) {
+                        isShow = false;
+                        rl_control.setVisibility(View.GONE);
+                    }
+                    handler.removeMessages(SHOWCONTROLLAYOUT);
+                    break;
             }
         }
     };
@@ -92,6 +107,8 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
      * (http://www.buzzingandroid.com/tools/android-layout-finder)
      */
     private void findViews() {
+        rl_control = (RelativeLayout)findViewById(R.id.rl_control);
+        rl_control.setVisibility(View.GONE);
         llStateTop = (LinearLayout)findViewById( R.id.ll_state_top );
         tvName = (TextView)findViewById( R.id.tv_name );
         ivBattery = (ImageView)findViewById( R.id.iv_battery );
@@ -109,6 +126,27 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         btnNext = (Button)findViewById( R.id.btn_next );
         btnScreenStatus = (Button)findViewById( R.id.btn_screen_status );
         videoview = (VideoView)findViewById(R.id.videoview);
+        detector = new GestureDetector(SystemVideoPlayer.this,new GestureDetector.SimpleOnGestureListener(){
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                Toast.makeText(SystemVideoPlayer.this, "双击", Toast.LENGTH_SHORT).show();
+                return super.onDoubleTap(e);
+            }
+
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+//                Toast.makeText(SystemVideoPlayer.this, "单击", Toast.LENGTH_SHORT).show();
+                switchMediaControlLayout();
+                return super.onSingleTapConfirmed(e);
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+                super.onLongPress(e);
+                //切换暂停和播放状态
+                switchPlayStatus();
+            }
+        });
 
         voiceControl.setOnClickListener( this );
         switchControl.setOnClickListener( this );
@@ -117,6 +155,21 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         btnPlayingStatus.setOnClickListener( this );
         btnNext.setOnClickListener( this );
         btnScreenStatus.setOnClickListener( this );
+    }
+
+    private void switchMediaControlLayout() {
+        if(isShow) {
+            isShow = false;
+            //隐藏控制面板
+            rl_control.setVisibility(View.GONE);
+            handler.removeMessages(SHOWCONTROLLAYOUT);
+        }else {
+            isShow = true;
+            //显示控制面板
+            rl_control.setVisibility(View.VISIBLE);
+            handler.removeMessages(SHOWCONTROLLAYOUT);
+            handler.sendEmptyMessageDelayed(SHOWCONTROLLAYOUT,5000);
+        }
     }
 
     /**
@@ -139,22 +192,28 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
             playPreVideo();
         } else if ( v == btnPlayingStatus ) {
             // Handle clicks for btnPlayingStatus
-            if(videoview.isPlaying()) {
-                //暂停播放
-                videoview.pause();
-                //将按钮设置为播放
-                btnPlayingStatus.setBackgroundResource(R.drawable.btn_play_drawable_selector);
-            }else {
-                //播放
-                videoview.start();
-                //将按钮设置为暂停
-                btnPlayingStatus.setBackgroundResource(R.drawable.btn_pause_drawable_selector);
-            }
+            switchPlayStatus();
         } else if ( v == btnNext ) {
             // Handle clicks for btnNext
             playNextVideo();
         } else if ( v == btnScreenStatus ) {
             // Handle clicks for btnScreenStatus
+        }
+        handler.removeMessages(SHOWCONTROLLAYOUT);
+        handler.sendEmptyMessageDelayed(SHOWCONTROLLAYOUT,5000);
+    }
+
+    private void switchPlayStatus() {
+        if(videoview.isPlaying()) {
+            //暂停播放
+            videoview.pause();
+            //将按钮设置为播放
+            btnPlayingStatus.setBackgroundResource(R.drawable.btn_play_drawable_selector);
+        }else {
+            //播放
+            videoview.start();
+            //将按钮设置为暂停
+            btnPlayingStatus.setBackgroundResource(R.drawable.btn_pause_drawable_selector);
         }
     }
 
@@ -311,17 +370,18 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             if(fromUser) {
                 videoview.seekTo(progress);
+                handler.removeMessages(SHOWCONTROLLAYOUT);
             }
         }
 
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
-
+            handler.removeMessages(SHOWCONTROLLAYOUT);
         }
 
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
-
+            handler.sendEmptyMessageDelayed(SHOWCONTROLLAYOUT,5000);
         }
     }
 
@@ -357,4 +417,10 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         }
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        super.onTouchEvent(event);
+        detector.onTouchEvent(event);
+        return true;
+    }
 }
