@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,12 +21,12 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.VideoView;
 
 import com.eyck.mobileplayer.DataBean.MediaInfo;
 import com.eyck.mobileplayer.R;
 import com.eyck.mobileplayer.utils.LogUtils;
 import com.eyck.mobileplayer.utils.TimeUtils;
+import com.eyck.mobileplayer.view.VideoView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -38,10 +39,15 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
     private ArrayList<MediaInfo> mediaInfos;
     private int position;
     private GestureDetector detector;
-    private boolean isShow = false;
+    private boolean isShow = false;//控制面板状态
+    private boolean isFullScreen = false;//视频状态
 
     private static final int PROGRESS = 1;//播放进度
     private static final int SHOWCONTROLLAYOUT = 2;//控制面板
+
+
+    private int videoWidth;
+    private int videoHeight;
 
     private Uri uri;
     private VideoView videoview;
@@ -93,6 +99,7 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
     };
 
 
+
     private String getSystemTime() {
         SimpleDateFormat format = new SimpleDateFormat("HH:mm:ss");
         String systemTime = format.format(new Date());
@@ -129,7 +136,8 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         detector = new GestureDetector(SystemVideoPlayer.this,new GestureDetector.SimpleOnGestureListener(){
             @Override
             public boolean onDoubleTap(MotionEvent e) {
-                Toast.makeText(SystemVideoPlayer.this, "双击", Toast.LENGTH_SHORT).show();
+                switchVideoScreenType();
+//                Toast.makeText(SystemVideoPlayer.this, "双击", Toast.LENGTH_SHORT).show();
                 return super.onDoubleTap(e);
             }
 
@@ -155,6 +163,39 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
         btnPlayingStatus.setOnClickListener( this );
         btnNext.setOnClickListener( this );
         btnScreenStatus.setOnClickListener( this );
+    }
+
+    private void switchVideoScreenType() {
+        DisplayMetrics metrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        int screenWidth = metrics.widthPixels;
+        int screenHeight = metrics.heightPixels;
+        if(isFullScreen) {//全屏
+            isFullScreen = false;
+            //切换为默认屏幕
+            int width = 0;
+            int height = 0;
+            if(screenWidth*videoHeight > screenHeight*videoWidth) {
+                width = videoWidth*screenHeight/videoHeight;
+                height = screenHeight;
+            }else if(screenWidth*videoHeight < screenHeight*videoWidth) {
+                width = screenWidth;
+                height = videoHeight*screenWidth/videoWidth;
+            }else {
+                width = screenWidth;
+                height = screenHeight;
+            }
+            videoview.setVideoSize(width,height);
+            //设置按键背景
+            btnScreenStatus.setBackgroundResource(R.drawable.btn_full_screen_drawable_selector);
+
+        }else {//默认
+            isFullScreen = true;
+            //切换为全屏
+            videoview.setVideoSize(screenWidth,screenHeight);
+            //设置按键背景
+            btnScreenStatus.setBackgroundResource(R.drawable.btn_default_screen_drawable_selector);
+        }
     }
 
     private void switchMediaControlLayout() {
@@ -198,6 +239,7 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
             playNextVideo();
         } else if ( v == btnScreenStatus ) {
             // Handle clicks for btnScreenStatus
+            switchVideoScreenType();
         }
         handler.removeMessages(SHOWCONTROLLAYOUT);
         handler.sendEmptyMessageDelayed(SHOWCONTROLLAYOUT,5000);
@@ -392,6 +434,8 @@ public class SystemVideoPlayer extends Activity implements View.OnClickListener 
             videoview.start();//播放
             //获取视频总时长
             int duration = videoview.getDuration();
+            videoWidth = mp.getVideoWidth();
+            videoHeight = mp.getVideoHeight();
             //设置进度
             sb_progress.setMax(duration);
             totalTime.setText(timeUtils.stringForTime(duration));

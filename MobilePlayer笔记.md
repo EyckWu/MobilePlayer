@@ -169,6 +169,16 @@ findViewById离线使用脚本快速实例化控件
 	重写 双击，单击，长按
 
 	3、onTouchEvent(),方法中把事件传递给手势识别器
+
+#调节声音
+    1、实例化AudioManager
+	当前的音量
+	最大音量
+
+	2、SeekBar.setMax(最大音量)
+	seekBar.setProgress(当前的音量)
+
+	3、设置SeekBar状态变化
     
     
 	
